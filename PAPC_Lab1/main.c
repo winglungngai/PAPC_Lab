@@ -1,46 +1,74 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <time.h>
+
+void prefixMinima();
+void printDataset();
 
 main ()
 {
+    int i, n;
 
-    int h,i,j;
-    int n;
-    int chunk = 1;
-    int colSize, a, b;
 
     //read input values from file;
     FILE *file = fopen("inputs/lab1/dataset2", "r");
-
     fscanf(file, "%i", &n);
     int A[n+1];
-    for(i=0; i<n+1; i++)
-        A[i]=0;
-
+    A[0]=0;
     for (i= 1; i<n+1; i++)
-    {
         fscanf(file, "%i", &A[i]);
-    }
+
+    //Define output
+    int C[n];
+
 
     //show inputs
-    printf("Inputs: ");
-    for (i= 1; i<n+1; i++)
-    {
-        printf("%i ", A[i]);
-    }
+    printDataset("Intput: ", &A, n+1);
+
+
+    //run the method and measure time-complexity
+    clock_t begin, end;
+    double time_spent;
+    begin = clock();
+
+    int repeat = 1000;
+    for(i=0; i<repeat;i++)
+        prefixMinima(n, &A, &C);
+
+    end = clock();
+    time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+    printf("Time spent: %.5f milliseconds \n", time_spent/repeat*1000);
+
+
+    //show outputs
+    printDataset("Output: ", &C, n);
+
+}
+
+void printDataset(char * description, int * dataset, int size)
+{
+    int i;
+    printf(description);
+    for(i=0; i<size; i++)
+        printf("%i ", dataset[i]);
     printf("\n");
+}
+
+void prefixMinima(int n, int *A, int *C)
+{
+    int h,i,j;
+
+    int chunk = 1;
+    int colSize, a, b;
 
     //init matrix B
     int rowCount = n;
     int colCount = (log (n) / log (2));
-    printf(" rowCount : %i, columnCount: %i \n", rowCount, colCount);
+    //printf(" rowCount : %i, columnCount: %i \n", rowCount, colCount);
 
     int B[colCount+1][rowCount+1];
-
-    for(i=0; i<rowCount+1; i++)
-        for(j=0; j<colCount+1; j++)
-            B[j][i]=0;
 
     //step 1
     #pragma omp parallel shared(A, B, rowCount, chunk) private(i)
@@ -75,7 +103,6 @@ main ()
                     B[h][j] = b;
             }
         }
-
     }
 
 
@@ -107,11 +134,9 @@ main ()
                 }
             }
         }
-
     }
 
     //step 4
-    int C[n];
     #pragma omp parallel shared(B, C, rowCount, chunk) private(i)
     {
         #pragma omp for schedule(dynamic,chunk) nowait
@@ -120,26 +145,5 @@ main ()
             C[i]=B[0][i+1];
         }
     }
-
-    //show outputs
-    printf("Outputs: ");
-    for(i=0; i<n; i++)
-    {
-        printf("%i ", C[i]);
-    }
-    printf("\n");
-
-
-
-//    //show results;
-//    for(i=0; i<rowCount+1; i++)
-//    {
-//        for(j=0; j<colCount+1; j++)
-//        {
-//            printf("%i \t\t", B[j][i]);
-//        }
-//        printf("\n");
-//    }
 }
-
 

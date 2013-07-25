@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1374774171 source:/media/Storage/Ubuntu/PAPC/repo/PAPC_Lab/PAPC_Lab1_P/main.c
+	<pthread.h>
+	<stdio.h>
+	<stdlib.h>
+
