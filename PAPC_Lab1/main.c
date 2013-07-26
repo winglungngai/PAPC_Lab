@@ -54,7 +54,7 @@ main ()
 
 
     //show outputs
-    printDataset("Output: ", &C, n);
+    //printDataset("Output: ", &C, n);
 
 }
 
