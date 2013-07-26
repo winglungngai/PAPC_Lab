@@ -9,67 +9,81 @@ void merge();
 
 main ()
 {
-    int i,m,n;
+    int h,i,j,k,l;
+    int nSize[7] = {16, 64, 256, 1024, 4096, 16384, 65536};
+    int threads[5] = {1, 2, 4, 8, 16};
+    int repeat = 1000;
 
-    //set up inputs
-    n = 10000;
-    m = 20000;
-    int A[n], B[m], AB[n+m];
-
-    srand (time(NULL));
-    for(i=0; i<n; i++)
-        A[i]=rand() % 30;
-    for(i=0; i<m; i++)
-        B[i]=rand() % 30;
-
-    qsort (A, n, sizeof (int), compare_ints);
-    qsort (B, m, sizeof (int), compare_ints);
-
-    //show inputs
-//    printf("A: ");
-//    for(i=0; i<n; i++)
-//        printf("%i ", A[i]);
-//    printf("\n");
-//
-//    printf("B: ");
-//    for(i=0; i<m; i++)
-//        printf("%i ", B[i]);
-//    printf("\n");
-
-    int k;
-    for(k=1;k<=8;k++)
+    printf("\t\t");
+    for(h=0;h<5;h++)
     {
-        int threads_num = k;
-
-        //run the method and measure time-complexity
-        omp_set_dynamic(0);
-        omp_set_num_threads(threads_num);
-
-        //start time measurement
-        struct timeval startt, endt, result;
-        int t;
-        int TIMES = 1000000;
-        result.tv_usec=0;
-        gettimeofday (&startt, NULL);
-
-        int repeat = 1000;
-        for(i=0; i<repeat;i++)
-            merge(A, B, AB, n, m, threads_num);
-
-        //start time measurement
-        gettimeofday (&endt, NULL);
-        result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
-        result.tv_usec = result.tv_usec/repeat;
-
-        //show elapsed time.
-        printf("threads_num: %i \t %ld.%06ld ms \n", threads_num, result.tv_usec/1000000, result.tv_usec%1000000);
+        printf("t=%i\t", threads[h]);
     }
+    printf("\n");
 
-    //show outputs
-//    printf("AB: ");
-//    for(i=0; i<m+n; i++)
-//        printf("%i ", AB[i]);
-//    printf("\n");
+    for(i=0; i<7; i++)
+    {
+        int m,n;
+        //set up inputs
+        n = nSize[i];
+        m = nSize[i]*2;
+        int A[n], B[m], AB[n+m];
+
+        srand (time(NULL));
+        for(j=0; j<n; j++)
+            A[i]=rand() % 30;
+        for(j=0; j<m; j++)
+            B[i]=rand() % 30;
+
+        qsort (A, n, sizeof (int), compare_ints);
+        qsort (B, m, sizeof (int), compare_ints);
+
+        //show inputs
+    //    printf("A: ");
+    //    for(i=0; i<n; i++)
+    //        printf("%i ", A[i]);
+    //    printf("\n");
+    //
+    //    printf("B: ");
+    //    for(i=0; i<m; i++)
+    //        printf("%i ", B[i]);
+    //    printf("\n");
+
+        printf("size=%.5i\t", nSize[i]);
+        for(k=0;k<5;k++)
+        {
+            //set up threads number.
+            int threads_num = threads[k];
+            omp_set_dynamic(0);
+            omp_set_num_threads(threads_num);
+
+            //start time measurement
+            struct timeval startt, endt, result;
+            int t;
+            int TIMES = 1000000;
+            result.tv_usec=0;
+            gettimeofday (&startt, NULL);
+
+            //run parellel algorithm
+            for(l=0; l<repeat;l++)
+                merge(A, B, AB, n, m, threads_num);
+
+            //start time measurement
+            gettimeofday (&endt, NULL);
+            result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
+            long timeDiff = result.tv_usec/repeat;
+
+            //show elapsed time.
+            printf("%03ld\t", timeDiff);
+        }
+        printf("\n");
+
+        //show outputs
+    //    printf("AB: ");
+    //    for(i=0; i<m+n; i++)
+    //        printf("%i ", AB[i]);
+    //    printf("\n");
+    }
 }
 
 void merge(int *A, int *B, int *AB, int n, int m, int threads_num)
