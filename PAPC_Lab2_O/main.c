@@ -45,18 +45,24 @@ main ()
         omp_set_dynamic(0);
         omp_set_num_threads(threads_num);
 
-        clock_t begin, end;
-        double time_spent;
-        begin = clock();
+        //start time measurement
+        struct timeval startt, endt, result;
+        int t;
+        int TIMES = 1000000;
+        result.tv_usec=0;
+        gettimeofday (&startt, NULL);
 
         int repeat = 1000;
         for(i=0; i<repeat;i++)
             merge(A, B, AB, n, m, threads_num);
 
-        end = clock();
-        time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+        //start time measurement
+        gettimeofday (&endt, NULL);
+        result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
+        result.tv_usec = result.tv_usec/repeat;
 
-        printf("threads_num: %i \t %.5f ms \n", threads_num, time_spent/repeat*1000);
+        //show elapsed time.
+        printf("threads_num: %i \t %ld.%06ld ms \n", threads_num, result.tv_usec/1000000, result.tv_usec%1000000);
     }
 
     //show outputs
