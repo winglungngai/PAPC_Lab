@@ -8,53 +8,67 @@ void printDataset();
 
 main ()
 {
-    int i, n;
+    int h,i,j,k,l;
+    int nSize[7] = {16, 64, 256, 1024, 4096, 16384, 65536};
+    int threads[5] = {1, 2, 4, 8, 16};
+    int repeat = 1000;
 
-
-    //read input values from file;
-    FILE *file = fopen("inputs/lab1/dataset3", "r");
-    fscanf(file, "%i", &n);
-    int A[n+1];
-    A[0]=0;
-    for (i= 1; i<n+1; i++)
-        fscanf(file, "%i", &A[i]);
-
-    //Define output
-    int C[n];
-
-
-    //show inputs
-    //printDataset("Intput: ", &A, n+1);
-
-
-    int k;
-    for(k=1;k<=8;k++)
+    printf("Lab Work 1 - Performance Test\n");
+    printf("\t\t");
+    for(h=0;h<5;h++)
     {
-        int threads_num = k;
-
-        //run the method and measure time-complexity
-        omp_set_dynamic(0);     // Explicitly disable dynamic teams
-        omp_set_num_threads(threads_num); // Use 4 threads for all consecutive parallel regions
-
-        clock_t begin, end;
-        double time_spent;
-        begin = clock();
-
-        int repeat = 10000;
-        for(i=0; i<repeat;i++)
-            prefixMinima(n, &A, &C);
-
-        end = clock();
-        time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-
-        printf("Time spent: \t %.5f ms \n", time_spent/repeat*1000);
+        printf("t=%i\t", threads[h]);
     }
+    printf("\n");
 
+    for(i=0; i<7; i++)
+    {
+        int n;
+        //set up inputs
+        n = nSize[i];
+        int A[n], C[n];
 
+        //set up inputs, A[0] is set to 0 as it should be empty.
+        A[0]=0;
+        srand (time(NULL));
+        for(j=0; j<n; j++)
+            A[i]=rand() % 300;
 
+        //show inputs
+        //printDataset("Intput: ", &A, n+1);
 
-    //show outputs
-    //printDataset("Output: ", &C, n);
+        printf("size=%.5i\t", nSize[i]);
+        for(k=0;k<5;k++)
+        {
+            //set up threads number.
+            int threads_num = threads[k];
+            omp_set_dynamic(0);
+            omp_set_num_threads(threads_num);
+
+            //start time measurement
+            struct timeval startt, endt, result;
+            int t;
+            int TIMES = 1000000;
+            result.tv_usec=0;
+            gettimeofday (&startt, NULL);
+
+            //run parellel algorithm
+            for(l=0; l<repeat;l++)
+                prefixMinima(n, &A, &C);
+
+            //end time measurement
+            gettimeofday (&endt, NULL);
+            result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
+            long timeDiff = result.tv_usec/repeat;
+
+            //show elapsed time.
+            printf("%03ld\t", timeDiff);
+        }
+        printf("\n");
+
+        //show outputs
+        //printDataset("Output: ", &C, n);
+    }
 
 }
 

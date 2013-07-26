@@ -3,9 +3,9 @@
 #include <omp.h>
 #include <time.h>
 
+void merge(int *A, int *B, int *AB, int n, int m, int threads_num);
 int rank(int a, int *sortedArray, int startPos, int endPos);
 int compare_ints (const void *a, const void *b);
-void merge();
 
 main ()
 {
@@ -68,7 +68,7 @@ main ()
             for(l=0; l<repeat;l++)
                 merge(A, B, AB, n, m, threads_num);
 
-            //start time measurement
+            //end time measurement
             gettimeofday (&endt, NULL);
             result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
             long timeDiff = result.tv_usec/repeat;
