@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <time.h>
+#include <math.h>
 
 void prefixMinima();
 void printDataset();
