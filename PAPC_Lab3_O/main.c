@@ -126,40 +126,37 @@ void listRank(int *O, int *R, int n)
         }
     }
 
-    int notRooted = 1;
+        omp_lock_t lock[n];
 
-    //printDataset("\nOrig S: ", S, n);
-    //printDataset("\nOrig R: ", R, n);
-    do {
-        notRooted = 0;
+        for (i=0; i<n; i++)
+            omp_init_lock(&(lock[i]));
 
-        //printf("new round\n");
-        //printDataset("\nStrIter S: ", S, n);
-        //printDataset("\nStrIter R: ", R, n);
-
-        #pragma omp parallel shared(R, S, n, notRooted) private(i)
+        #pragma omp parallel shared(R, S, n, lock) private(i)
         {
-            #pragma omp for schedule(static)
+            #pragma omp for schedule(static) nowait
             for(i=0;i<n;i++)
             {
-                if(S[i] != S[S[i]])
+                while(S[i]!=0)
                 {
 
-                    R[i] = R[i] + R[S[i]];
-                    S[i] = S[S[i]];
+                    if(S[i] != S[S[i]])
+                    {
+
+                        omp_set_lock(&(lock[i]));
+
+                        R[i] = R[i] + R[S[i]];
+                        S[i] = S[S[i]];
+
+                        omp_unset_lock(&(lock[i]));
+
+                    }
                 }
-                if(S[i] != 0)
-                {
-                    //printf("S[%i]!=0\n", i);
-                    notRooted = 1;
-                }
+
             }
         }
-        //printDataset("\nEndIter S: ", S, n);
-        //printDataset("\nEndIter R: ", R, n);
-    }
-    while (notRooted != 0);
-    return 0;
+
+        for (i=0; i<n; i++)
+            omp_destroy_lock(&(lock[i]));
 }
 
 void listRankSeq(int *S, int *R, int n)
