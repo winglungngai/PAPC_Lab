@@ -21,7 +21,7 @@ main ()
     int threads[5] = {1, 2, 4, 8, 16};
     int repeat = 1000;
 
-    printf("Lab Work 2 - Performance Test\n");
+    printf("Lab Work 2 - Performance Test - Merge By Ranking\n");
     printf("\t\tseq\t");
     for(h=0;h<t_var;h++)
         printf("t=%i\t", threads[h]);
@@ -54,6 +54,7 @@ main ()
         printf("\n");
 
         //printDataset("Output AB: ", AB, n+m);
+        //printf("\n");
     }
 }
 

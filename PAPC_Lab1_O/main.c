@@ -7,71 +7,53 @@
 void prefixMinima();
 void suffixMinima();
 void printDataset();
-void performanceTestSuffixMinima();
-void performanceTestPrefixMinima();
+void performanceTest();
 void suffixMinimaSeq(int n, int *A, int *D);
 void prefixMinimaSeq(int n, int *A, int *C);
+void setup(int **A, int **C, int n);
+void timeFunc(void (*f)(int, int *, int *), int n, int *A, int *C, int repeat);
 
 main ()
 {
-    performanceTestPrefixMinima();
-    performanceTestSuffixMinima();
+    performanceTest(1);
+    performanceTest(2);
 }
 
-void performanceTestPrefixMinima()
+void performanceTest(int minType)
 {
     int h,i,j,k;
     int n_var=7;
     int t_var=5;
     int nSize[7] = {16, 64, 256, 1024, 4096, 16384, 65536};
     int threads[5] = {1, 2, 4, 8, 16};
-    int repeat = 1000;
+    int repeat = 100;
 
-    printf("Lab Work 1 - Performance Test\n");
+    if(minType==1)
+        printf("Lab Work 1 - Performance Test - PrefixMinima\n");
+    else if (minType==2)
+        printf("Lab Work 1 - Performance Test - SuffixMinima\n");
+
     printf("\t\tseq\t");
-    for(h=0;h<5;h++)
-    {
+    for(h=0;h<t_var;h++)
         printf("t=%i\t", threads[h]);
-    }
     printf("\n");
 
-    for(i=0; i<7; i++)
+    for(i=0; i<n_var; i++)
     {
-        int n;
         //set up inputs
+        int n;
         n = nSize[i];
-        int A[n+1], C[n];
+        int *A, *C;
+        setup(&A,&C, n);
 
-        //set up inputs, A[0] is set to 0 as it should be empty.
-        A[0]=0;
-        srand (time(NULL));
-        for(j=0; j<n+1; j++)
-            A[i]=rand() % 300;
+        //printDataset("Intput: ", A, n+1);
 
-        //show inputs
-        //printDataset("Intput: ", &A, n+1);
+        printf("size=%.5i\t", n);
 
-        printf("size=%.5i\t", nSize[i]);
-
-        //start time measurement
-        struct timeval startt, endt, result;
-        int t;
-        long timeDiff;
-        result.tv_usec=0;
-        gettimeofday (&startt, NULL);
-
-        //run sequential algorithm
-        for(l=0; l<repeat;l++)
-            prefixMinimaSeq(n, A, C);
-
-        //end time measurement
-        gettimeofday (&endt, NULL);
-        result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
-        timeDiff = result.tv_usec/repeat;
-
-        //show elapsed time.
-        printf("%03ld\t", timeDiff);
-
+        if(minType==1)
+            timeFunc(prefixMinimaSeq, n, A, C, repeat);
+        else if (minType==2)
+            timeFunc(suffixMinimaSeq, n, A, C, repeat);
 
         for(k=0;k<5;k++)
         {
@@ -80,113 +62,51 @@ void performanceTestPrefixMinima()
             omp_set_dynamic(0);
             omp_set_num_threads(threads_num);
 
-            //start time measurement
-            result.tv_usec=0;
-            gettimeofday (&startt, NULL);
-
-            //run parellel algorithm
-            for(l=0; l<repeat;l++)
-                prefixMinima(n, &A, &C);
-
-            //end time measurement
-            gettimeofday (&endt, NULL);
-            result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
-            long timeDiff = result.tv_usec/repeat;
-
-            //show elapsed time.
-            printf("%03ld\t", timeDiff);
+            if(minType==1)
+                timeFunc(prefixMinima, n, A, C, repeat);
+            else if (minType==2)
+                timeFunc(suffixMinima, n, A, C, repeat);
         }
         printf("\n");
 
-        //show outputs
-        //printDataset("Output: ", &C, n);
+        //printDataset("Output: ", C, n);
+        //printf("\n");
     }
 }
 
 
-void performanceTestSuffixMinima()
+void setup(int **A, int **C, int n)
 {
-    int h,i,j,k,l;
-    int nSize[7] = {16, 64, 256, 1024, 4096, 16384, 65536};
-    int threads[5] = {1, 2, 4, 8, 16};
-    int repeat = 1000;
+    int j;
+    *A = (int *) malloc((n+1)*sizeof(int));
+    *C = (int *) malloc(n*sizeof(int));
 
-    printf("Lab Work 1 - Performance Test\n");
-    printf("\t\t");
-    printf("seq\t");
-    for(h=0;h<5;h++)
-    {
-        printf("t=%i\t", threads[h]);
-    }
-    printf("\n");
+    srand (time(NULL));
+    (*A)[0]=0;
+    for(j=1; j<n+1; j++)
+        (*A)[j]=rand() % 300;
+}
 
-    for(i=0; i<7; i++)
-    {
-        int n;
-        //set up inputs
-        n = nSize[i];
-        int A[n+1], C[n];
+void timeFunc(void (*f)(int, int *, int *), int n, int *A, int *C, int repeat)
+{
+    //start time measurement
+    struct timeval startt, endt, result;
+    int t;
+    long timeDiff;
+    result.tv_usec=0;
+    gettimeofday (&startt, NULL);
 
-        //set up inputs, A[0] is set to 0 as it should be empty.
-        A[0]=0;
-        srand (time(NULL));
-        for(j=0; j<n+1; j++)
-            A[i]=rand() % 300;
+    int l;
+    for(l=0; l<repeat;l++)
+        (*f)(n, A, C);
 
-        //show inputs
-        //printDataset("Intput: ", &A, n+1);
+    //end time measurement
+    gettimeofday (&endt, NULL);
+    result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
+    timeDiff = result.tv_usec/repeat;
 
-        printf("size=%.5i\t", nSize[i]);
-
-        //start time measurement
-        struct timeval startt, endt, result;
-        int t;
-        long timeDiff;
-        result.tv_usec=0;
-        gettimeofday (&startt, NULL);
-
-        //run sequential algorithm
-        for(l=0; l<repeat;l++)
-            suffixMinimaSeq(n, A, C);
-
-        //end time measurement
-        gettimeofday (&endt, NULL);
-        result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
-        timeDiff = result.tv_usec/repeat;
-
-        //show elapsed time.
-        printf("%03ld\t", timeDiff);
-
-
-        for(k=0;k<5;k++)
-        {
-            //set up threads number.
-            int threads_num = threads[k];
-            omp_set_dynamic(0);
-            omp_set_num_threads(threads_num);
-
-            //start time measurement
-            result.tv_usec=0;
-            gettimeofday (&startt, NULL);
-
-            //run parellel algorithm
-            for(l=0; l<repeat;l++)
-                suffixMinima(n, &A, &C);
-
-            //end time measurement
-            gettimeofday (&endt, NULL);
-            result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
-            timeDiff = result.tv_usec/repeat;
-
-            //show elapsed time.
-            printf("%03ld\t", timeDiff);
-        }
-        printf("\n");
-
-        //show outputs
-        //printDataset("Output: ", &C, n);
-    }
-
+    //show elapsed time.
+    printf("%ld\t", timeDiff);
 }
 
 void printDataset(char * description, int * dataset, int size)
@@ -236,13 +156,14 @@ void suffixMinima(int n, int *A, int *D)
 {
     int i;
     int B[n+1], C[n];
+    B[0]=0;
 
     #pragma omp parallel shared(A, B, n) private(i)
     {
         #pragma omp for schedule(static) nowait
-        for(i=0;i<n;i++)
+        for(i=1;i<n+1;i++)
         {
-            B[i]=A[(n-1)-i];
+            B[i]=A[(n+1)-i];
         }
     }
 
@@ -263,7 +184,6 @@ void prefixMinima(int n, int *A, int *C)
 {
     int h,i,j;
 
-    int chunk = 128;
     int colSize, a, b;
 
     //init matrix B
@@ -274,9 +194,9 @@ void prefixMinima(int n, int *A, int *C)
     int B[colCount+1][rowCount+1];
 
     //step 1
-    #pragma omp parallel shared(A, B, rowCount, chunk) private(i)
+    #pragma omp parallel shared(A, B, rowCount) private(i)
     {
-        #pragma omp for schedule(static,chunk) nowait
+        #pragma omp for schedule(static) nowait
         for(i=0; i<rowCount+1; i++)
         {
 //            int ID = omp_get_thread_num();
@@ -289,10 +209,10 @@ void prefixMinima(int n, int *A, int *C)
     //step 2
     for(h=1;h<=colCount;h++)
     {
-        #pragma omp parallel shared(A, B, h, colSize, chunk) private(j,a,b)
+        #pragma omp parallel shared(A, B, h, colSize) private(j,a,b)
         {
             colSize = (int) (n / pow((double) 2,h));
-            #pragma omp for schedule(static,chunk) nowait
+            #pragma omp for schedule(static) nowait
             for(j=1;j<=colSize;j++)
             {
 //                int ID = omp_get_thread_num();
@@ -312,10 +232,10 @@ void prefixMinima(int n, int *A, int *C)
     //step 3
     for(h=colCount;h>=0;h--)
     {
-        #pragma omp parallel shared(A, B, h, colSize, chunk) private(j,a,b)
+        #pragma omp parallel shared(A, B, h, colSize) private(j,a,b)
         {
             int colSize = (int) (n / pow((double) 2,h));
-            #pragma omp for schedule(static,chunk) nowait
+            #pragma omp for schedule(static) nowait
             for(j=1;j<=colSize+1;j++)
             {
                 if((j%2)==0)
@@ -340,9 +260,9 @@ void prefixMinima(int n, int *A, int *C)
     }
 
     //step 4
-    #pragma omp parallel shared(B, C, rowCount, chunk) private(i)
+    #pragma omp parallel shared(B, C, rowCount) private(i)
     {
-        #pragma omp for schedule(static,chunk) nowait
+        #pragma omp for schedule(static) nowait
         for(i=0; i<n; i++)
         {
             C[i]=B[0][i+1];
