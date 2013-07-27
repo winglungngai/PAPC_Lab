@@ -21,6 +21,7 @@ main ()
     int threads[5] = {1, 2, 4, 8, 16};
     int repeat = 1000;
 
+    printf("Lab Work 2 - Performance Test\n");
     printf("\t\tseq\t");
     for(h=0;h<5;h++)
         printf("t=%i\t", threads[h]);
