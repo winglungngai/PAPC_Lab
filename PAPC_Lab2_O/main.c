@@ -11,6 +11,7 @@ void setup(int **A, int **B, int **AB, int n, int m);
 void printDataset(char * description, int * dataset, int size);
 void timeFunc(void (*f)(int *, int *, int *, int, int, int), int *A, int *B, int *AB, int n, int m, int threads_num, int repeat);
 void mergeSeq(int *A, int *B, int *AB, int n, int m, int threads_num);
+void verifyResult(int *seqResult, int *parResult, int n);
 
 main ()
 {
@@ -42,6 +43,10 @@ main ()
 
         timeFunc(mergeSeq, A, B, AB, n, m, 1, repeat);
 
+        int seqResult[n+m];
+        for(j=0;j<n+m;j++)
+            seqResult[j] = AB[j];
+
         for(k=0;k<t_var;k++)
         {
             //set up threads number.
@@ -51,6 +56,10 @@ main ()
 
             timeFunc(merge, A, B, AB, n, m, threads_num, repeat);
         }
+        int parResult[n+m];
+        for(j=0;j<n+m;j++)
+            parResult[j] = AB[j];
+        verifyResult(seqResult, parResult, n);
         printf("\n");
 
         //printDataset("Output AB: ", AB, n+m);
@@ -78,6 +87,31 @@ void timeFunc(void (*f)(int *, int *, int *, int, int, int), int *A, int *B, int
 
     //show elapsed time.
     printf("%03ld\t", timeDiff);
+}
+
+void verifyResult(int *seqResult, int *parResult, int n)
+{
+    int identical = 1;
+    int i;
+    for(i=0;i<n;i++)
+    {
+        if(seqResult[i] != parResult[i])
+            identical = 0;
+    }
+    if(identical)
+    {
+        printf("seq=par");
+    }
+    else
+    {
+        printf("seq!=par");
+    }
+
+//    if(n<64)
+//    {
+//        printDataset("\nseq: ", seqResult, n);
+//        printDataset("par: ", parResult, n);
+//    }
 }
 
 void printDataset(char * description, int * dataset, int size)

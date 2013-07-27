@@ -12,6 +12,7 @@ void suffixMinimaSeq(int n, int *A, int *D);
 void prefixMinimaSeq(int n, int *A, int *C);
 void setup(int **A, int **C, int n);
 void timeFunc(void (*f)(int, int *, int *), int n, int *A, int *C, int repeat);
+void verifyResult(int *seqResult, int *parResult, int n);
 
 main ()
 {
@@ -26,7 +27,7 @@ void performanceTest(int minType)
     int t_var=5;
     int nSize[7] = {16, 64, 256, 1024, 4096, 16384, 65536};
     int threads[5] = {1, 2, 4, 8, 16};
-    int repeat = 100;
+    int repeat = 1000;
 
     if(minType==1)
         printf("Lab Work 1 - Performance Test - PrefixMinima\n");
@@ -55,6 +56,10 @@ void performanceTest(int minType)
         else if (minType==2)
             timeFunc(suffixMinimaSeq, n, A, C, repeat);
 
+        int seqResult[n];
+        for(j=0;j<n;j++)
+            seqResult[j] = C[j];
+
         for(k=0;k<5;k++)
         {
             //set up threads number.
@@ -67,6 +72,10 @@ void performanceTest(int minType)
             else if (minType==2)
                 timeFunc(suffixMinima, n, A, C, repeat);
         }
+        int parResult[n];
+        for(j=0;j<n;j++)
+            parResult[j] = C[j];
+        verifyResult(seqResult, parResult, n);
         printf("\n");
 
         //printDataset("Output: ", C, n);
@@ -109,6 +118,31 @@ void timeFunc(void (*f)(int, int *, int *), int n, int *A, int *C, int repeat)
     printf("%ld\t", timeDiff);
 }
 
+void verifyResult(int *seqResult, int *parResult, int n)
+{
+    int identical = 1;
+    int i;
+    for(i=0;i<n;i++)
+    {
+        if(seqResult[i] != parResult[i])
+            identical = 0;
+    }
+    if(identical)
+    {
+        printf("seq=par");
+    }
+    else
+    {
+        printf("seq!=par");
+    }
+
+//    if(n<64)
+//    {
+//        printDataset("\nseq: ", seqResult, n);
+//        printDataset("par: ", parResult, n);
+//    }
+}
+
 void printDataset(char * description, int * dataset, int size)
 {
     int i;
@@ -141,7 +175,7 @@ void suffixMinimaSeq(int n, int *A, int *D)
 
     D[n-1]=A[n-1+swiftPos];
 
-    for(i=n-2; i>0; i--)
+    for(i=n-2; i>=0; i--)
     {
         if(D[i+1]<A[i+swiftPos])
             D[i]=D[i+1];

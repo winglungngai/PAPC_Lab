@@ -8,6 +8,7 @@ void printDataset(char * description, int * dataset, int size);
 void listRank(int *O, int *R, int n);
 void timeFunc(void (*f)(int *, int *, int), int *S, int *R, int n, int repeat);
 void listRankSeq(int *S, int *R, int n);
+void verifyResult(int *seqResult, int *parResult, int n);
 
 main ()
 {
@@ -43,6 +44,10 @@ main ()
 
         timeFunc(listRankSeq, S, R, n, repeat);
 
+        int seqResult[n];
+        for(j=0;j<n;j++)
+            seqResult[j] = R[j];
+
         for(k=0;k<t_var;k++)
         {
             //set up threads number.
@@ -52,11 +57,46 @@ main ()
 
             timeFunc(listRank, S, R, n, repeat);
         }
+
+        int parResult[n];
+        for(j=0;j<n;j++)
+            parResult[j] = R[j];
+
+        verifyResult(seqResult, parResult, n);
         printf("\n");
+
+
+
+
 
         //printDataset("Output R: ", R, n);
         //printf("\n");
     }
+}
+
+void verifyResult(int *seqResult, int *parResult, int n)
+{
+    int identical = 1;
+    int i;
+    for(i=0;i<n;i++)
+    {
+        if(seqResult[i] != parResult[i])
+            identical = 0;
+    }
+    if(identical)
+    {
+        printf("seq=par");
+    }
+    else
+    {
+        printf("seq!=par");
+    }
+
+//    if(n<64)
+//    {
+//        printDataset("\nseq: ", seqResult, n);
+//        printDataset("par: ", parResult, n);
+//    }
 }
 
 
@@ -76,7 +116,7 @@ void listRank(int *O, int *R, int n)
 
     #pragma omp parallel shared(R, S, n) private(i)
     {
-        #pragma omp for schedule(static) nowait
+        #pragma omp for schedule(static)
         for(i=0;i<n;i++)
         {
             if(i != S[i])
@@ -99,7 +139,7 @@ void listRank(int *O, int *R, int n)
 
         #pragma omp parallel shared(R, S, n, notRooted) private(i)
         {
-            #pragma omp for schedule(static) nowait
+            #pragma omp for schedule(static)
             for(i=0;i<n;i++)
             {
                 if(S[i] != S[S[i]])
