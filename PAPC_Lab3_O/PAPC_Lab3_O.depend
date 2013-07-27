@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1374948458 source:/media/Storage/Ubuntu/PAPC/repo/PAPC_Lab/PAPC_Lab3_O/main.c
+	<stdio.h>
+	<stdlib.h>
+	<omp.h>
+	<time.h>
+
