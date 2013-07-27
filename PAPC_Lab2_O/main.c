@@ -23,7 +23,7 @@ main ()
 
     printf("Lab Work 2 - Performance Test\n");
     printf("\t\tseq\t");
-    for(h=0;h<5;h++)
+    for(h=0;h<t_var;h++)
         printf("t=%i\t", threads[h]);
     printf("\n");
 

@@ -20,14 +20,15 @@ main ()
 
 void performanceTestPrefixMinima()
 {
-    int h,i,j,k,l;
+    int h,i,j,k;
+    int n_var=7;
+    int t_var=5;
     int nSize[7] = {16, 64, 256, 1024, 4096, 16384, 65536};
     int threads[5] = {1, 2, 4, 8, 16};
     int repeat = 1000;
 
     printf("Lab Work 1 - Performance Test\n");
-    printf("\t\t");
-    printf("seq\t");
+    printf("\t\tseq\t");
     for(h=0;h<5;h++)
     {
         printf("t=%i\t", threads[h]);
