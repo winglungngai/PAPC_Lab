@@ -102,8 +102,11 @@ void verifyResult(int *seqResult, int *parResult, int n)
 
 void listRank(int *O, int *R, int n)
 {
-    int i;
+    int i,j;
     int S[n];
+    int SS[n];
+    int RR[n];
+
 
     #pragma omp parallel shared(O, S, n) private(i)
     {
@@ -111,6 +114,7 @@ void listRank(int *O, int *R, int n)
         for(i=0;i<n;i++)
         {
             S[i]=O[i];
+            SS[i]=O[i];
         }
     }
 
@@ -120,43 +124,40 @@ void listRank(int *O, int *R, int n)
         for(i=0;i<n;i++)
         {
             if(i != S[i])
+            {
                 R[i]=1;
+                RR[i]=1;
+            }
             else
+            {
                 R[i]=0;
+                RR[i]=0;
+            }
         }
     }
 
-        omp_lock_t lock[n];
-
-        for (i=0; i<n; i++)
-            omp_init_lock(&(lock[i]));
-
-        #pragma omp parallel shared(R, S, n, lock) private(i)
+    for(j=0;j<(log (n) / log (2));j++)
+    {
+        #pragma omp parallel shared(R, S, n, RR, SS) default(none)
         {
-            #pragma omp for schedule(static) nowait
+            #pragma omp for schedule(static)
             for(i=0;i<n;i++)
             {
-                while(S[i]!=0)
+                if(S[i] != S[S[i]])
                 {
-
-                    if(S[i] != S[S[i]])
-                    {
-
-                        omp_set_lock(&(lock[i]));
-
-                        R[i] = R[i] + R[S[i]];
-                        S[i] = S[S[i]];
-
-                        omp_unset_lock(&(lock[i]));
-
-                    }
+                    RR[i] = R[i] + R[S[i]];
+                    SS[i] = S[S[i]];
                 }
+            }
 
+            #pragma omp for schedule(static)
+            for(i=0;i<n;i++)
+            {
+                R[i] = RR[i];
+                S[i] = SS[i];
             }
         }
-
-        for (i=0; i<n; i++)
-            omp_destroy_lock(&(lock[i]));
+    }
 }
 
 void listRankSeq(int *S, int *R, int n)
