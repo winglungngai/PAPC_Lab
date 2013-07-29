@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <time.h>
+#include <math.h>
 
 void setup(int **S, int **R, int n);
 void printDataset(char * description, int * dataset, int size);
