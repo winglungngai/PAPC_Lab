@@ -23,7 +23,7 @@ void mergeSeq_r(int *A, int *B, int *AB, int n, int m, int aPos, int bPos, int a
 //#define NSIZE 1
 #define NSIZE 7
 #define NMAX 262144
-int Ns[NSIZE] = {4096, 8192, 16384, 32768, 65536, 131072, 262144};
+int Ns[NSIZE] = {16, 64, 256, 1024, 4096, 16384, 65536};
 //int Ns[NSIZE] = {10};
 
 typedef struct __ThreadArg {
