@@ -138,7 +138,7 @@ int main (int argc, char *argv[])
 		}
 		gettimeofday (&endt, NULL);
 		result.tv_usec = (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
-		printf(" %ld.%06ld | ", result.tv_usec/1000000, result.tv_usec%1000000);
+		printf("%ld | ", result.tv_usec/TIMES);
 
         int seqResult[n+m];
         for(j=0;j<n+m;j++)
@@ -197,7 +197,7 @@ int main (int argc, char *argv[])
 			        return -1;
 			}
    			result.tv_usec += (endt.tv_sec*1000000+endt.tv_usec) - (startt.tv_sec*1000000+startt.tv_usec);
-			printf(" %ld.%06ld | ", result.tv_usec/1000000, result.tv_usec%1000000);
+			printf("%ld | ", result.tv_usec/TIMES);
 		}
         int parResult[n+m];
         for(j=0;j<n+m;j++)
